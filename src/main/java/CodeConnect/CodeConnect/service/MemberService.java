@@ -9,6 +9,7 @@ import CodeConnect.CodeConnect.repository.MemberRepository;
 import CodeConnect.CodeConnect.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,8 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final SignupValidateService signupValidateService;
 
-    private final String imagePath = "src/main/resources/image/member/default/default_profile.png"; // 외부 저장소에 있는 이미지 파일 경로
+    @Value("${default.image}")
+    private String imagePath; // 외부 저장소에 있는 이미지 파일 경로
 
     // 회원가입
     public ResponseDto<Member> signUp(SignUpRequestDto dto) {
@@ -38,6 +40,7 @@ public class MemberService {
         String nickname = dto.getNickname();
         String password = dto.getPassword();
         String passwordCheck = dto.getPasswordCheck();
+        String address = dto.getAddress();
         List<String> fieldList = dto.getFieldList();
 
         // 이메일 중복 체크
@@ -67,6 +70,10 @@ public class MemberService {
         // 관심분야 값 체크
         if (fieldList.size() > 2) {
             return ResponseDto.setFail("관심 분야는 2개까지 선택 가능합니다.");
+        }
+
+        if (address == null || address.isEmpty()) {
+            return ResponseDto.setFail("주소를 입력해 주세요");
         }
 
         // 클라이언트에서 받아온 값으로 Member 객체 생성
